@@ -1,0 +1,950 @@
+{
+	"info": {
+		"_postman_id": "05bc3e40-6387-40b0-9f58-25246117cdd5",
+		"name": "MEGA_ASK_TEST",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31258069"
+	},
+	"item": [
+		{
+			"name": "[T] log in",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that \"token\" field is present",
+							"pm.test(\"Response has token\", function () {",
+							"    pm.expect(jsonData).to.have.property('token');",
+							"});",
+							"// Verify that \"ID\" field is present",
+							"pm.test(\"Response has ID\", function () {",
+							"    pm.expect(jsonData.user).to.have.property('id');",
+							"});",
+							"",
+							"// Verify that Response body has string \"Teacher\"",
+							"pm.test(\"Response has role Teacher\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"TEACHER\");",
+							"});",
+							"",
+							"// Saving the token value into an environment variable",
+							"pm.environment.set(\"adminToken\", jsonData.token);",
+							"",
+							"// Verify Token value is set into an environment",
+							"pm.test(\"adminToken is set\", function () {",
+							"    pm.expect(pm.environment.get(\"adminToken\")).to.eql(jsonData.token);",
+							"});",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"",
+							"",
+							"",
+							"",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{Temail}}\",\n  \"password\": \"{{Tpassword}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/sign-in",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T] create Quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// set Id into environment",
+							"pm.environment.set(\"quizID\", jsonData.id);",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"// Verify that \"ID\" field is present",
+							"pm.test(\"Response has ID\", function () {",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"});",
+							"",
+							"// Verify date and time formation",
+							"pm.test(\"Check date format\", function () {",
+							"    pm.expect(jsonData.createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/);",
+							"    pm.expect(jsonData.updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/);",
+							"});",
+							"",
+							"pm.test(\"Verify quiz ID eql \", function () {",
+							"    pm.expect(jsonData.id).to.eql(pm.environment.get(\"quizID\"));",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Demo API TEST Quizz\",\n  \"totalScore\": 20,\n  \"passingPercentage\": 75,\n  \"showStopperQuestion\": 0,\n  \"questions\": [\n    {\n      \"type\": \"TEXTUAL\",\n      \"question\": \"What is your name?\",\n      \"score\": 10\n    },\n    {\n      \"type\": \"SINGLE_CHOICE\",\n      \"question\": \"Which city is city largest in California?\",\n      \"score\": 7,\n      \"answer\": 1,\n      \"hasOtherOption\": false,\n      \"options\": [\n        \"San Francisco\",\n        \"Kiev\",\n        \"Los Angeles\",\n        \"Saratov\"\n      ]\n    },\n    {\n      \"type\": \"MULTIPLE_CHOICE\",\n      \"question\": \"Who was apple founded by?\",\n      \"score\": 6,\n      \"answers\": [\n        0,\n        1,\n        2\n      ],\n      \"hasOtherOption\": true,\n      \"options\": [\n        \"Steve Jobs\",\n        \"Donald Trump\",\n        \"Ronald Wayne\",\n        \"The Rock\"\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/quiz",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"quiz"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T ]Update quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"// Verify that \"ID\" field is present",
+							"pm.test(\"Response has ID\", function () {",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"});",
+							"",
+							"// Verify date and time formation",
+							"pm.test(\"Check date format\", function () {",
+							"    pm.expect(jsonData.createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/);",
+							"    pm.expect(jsonData.updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Demo Quiz API CHANGED\",\n  \"totalScore\": 18,\n  \"passingPercentage\": 75,\n  \"showStopperQuestion\": 0,\n  \"questions\": [\n    {\n      \"type\": \"TEXTUAL\",\n      \"question\": \"What is your name?\",\n      \"score\": 5\n    },\n    {\n      \"type\": \"SINGLE_CHOICE\",\n      \"question\": \"Which city is city largest in California?\",\n      \"score\": 7,\n      \"answer\": 2,\n      \"hasOtherOption\": false,\n      \"options\": [\n        \"San Francisco\",\n        \"Sacramento\",\n        \"Los Angeles\",\n        \"Redding\"\n      ]\n    },\n    {\n      \"type\": \"MULTIPLE_CHOICE\",\n      \"question\": \"Who was apple founded by?\",\n      \"score\": 6,\n      \"answers\": [\n        0,\n        1,\n        2\n      ],\n      \"hasOtherOption\": true,\n      \"options\": [\n        \"Steve Jobs\",\n        \"Steve Wozniak\",\n        \"Ronald Wayne\",\n        \"Ronald Reagan\"\n      ]\n    }\n  ],\n  \"id\": {{quizID}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/quiz",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"quiz"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T ] get all quizzes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Verify if the value of quizID is contained in the response text\", function () {",
+							"    var quizID = pm.environment.get(\"quizID\"); ",
+							"    pm.expect(pm.response.text()).to.include(quizID);  ",
+							"});",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Verify that we have correct quiz ID \", function () {",
+							"    var quizID = pm.environment.get(\"quizID\");",
+							"    var found = false;",
+							"    for (var i = 0; i < jsonData.length; i++) {",
+							"        if (jsonData[i].id === parseInt(quizID)) {",
+							"            found = true;",
+							"            break;",
+							"        }",
+							"    }",
+							"    pm.expect(found).to.eql(true); ",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/quizzes",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"quizzes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T] create Assignment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that response is an Array",
+							"pm.test(\"Response is an array\", function () {",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});",
+							"",
+							"// Verify that Array has expected settings",
+							"if (Array.isArray(jsonData)) {",
+							"    // Check if the array has items",
+							"    if (jsonData.length > 0) {",
+							"        // Check properties of the first item",
+							"        pm.test(\"First item has expected properties\", function () {",
+							"            pm.expect(jsonData[0]).to.have.property('id');",
+							"            pm.expect(jsonData[0]).to.have.property('userId');",
+							"            pm.expect(jsonData[0]).to.have.property('status').that.equals('ASSIGNED');",
+							"            pm.expect(jsonData[0]).to.have.property('result').that.equals('PENDING');",
+							"        });",
+							"",
+							"        // Save ID for delete into environment",
+							"        pm.environment.set(\"AssignIDEL\", jsonData[0].assignmentGroupID);",
+							"",
+							"        // save ID for student assigment",
+							"        pm.environment.set(\"assignID\", jsonData[0].id);",
+							"",
+							"        // Verify that ID is saved",
+							"        pm.test(\"AssignIDEL is set\", function () {",
+							"            pm.expect(pm.environment.get(\"AssignIDEL\")).to.eql(jsonData[0].assignmentGroupID);",
+							"        });",
+							"    } else {",
+							"        // If the array is empty, fail the test",
+							"        pm.test(\"Response array is empty\", function () {",
+							"            pm.expect(jsonData.length).to.be.greaterThan(0);",
+							"        });",
+							"    }",
+							"} else {",
+							"    // If response is not an array, fail the test",
+							"    pm.test(\"Response is not an array\", function () {",
+							"        pm.expect(Array.isArray(jsonData)).to.be.true;",
+							"    });",
+							"}",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"quizId\": {{quizID}},\n  \"userIds\": [{{studentID}}]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/assignment",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"assignment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T] list of assignments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Verify that we have correct Assignment ID \", function () {",
+							"    var assignID = pm.environment.get(\"assignID\");",
+							"    var found = false;",
+							"    for (var i = 0; i < jsonData.length; i++) {",
+							"        if (jsonData[i].id === parseInt(assignID)) {",
+							"            found = true;",
+							"            break;",
+							"        }",
+							"    }",
+							"    pm.expect(found).to.eql(true); ",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/assignments",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[S] Log-in",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"//Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// verify that \"token field\" is present",
+							"pm.test(\"Response has token\", function () {",
+							"    pm.expect(jsonData).to.have.property('token');",
+							"});",
+							"",
+							"// verify that \"ID field\" is present",
+							"pm.test(\"Response has ID\", function () {",
+							"    pm.expect(jsonData.user).to.have.property('id');",
+							"});",
+							"",
+							"// Saving the token value into an environment variable",
+							"pm.environment.set(\"studentToken\", jsonData.token);",
+							"",
+							"//verify Token value is set into an environment",
+							"pm.test(\"studentToken is set\", function () {",
+							"    pm.expect(pm.environment.get(\"studentToken\")).to.eql(jsonData.token);",
+							"});",
+							"",
+							"//Saving the ID value into an environment variable",
+							"pm.environment.set(\"studentID\", String(jsonData.user.id));",
+							"",
+							"//verify ID value is set into an environment",
+							"pm.test(\"studentID is set\", function () {",
+							"    var studentID = pm.environment.get(\"studentID\")",
+							"    var IDstring = String(jsonData.user.id);",
+							"    pm.expect(studentID).to.eql(IDstring);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+							"});",
+							"",
+							"pm.test(\"Body matches user role is STUDENT\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"STUDENT\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{Semail}}\",\n  \"password\": \"{{Spassword}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/sign-in",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[S] list of assignments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Check if the ID matches the assignID\", function () {",
+							"    var assignID = pm.environment.get(\"assignID\");",
+							"    pm.expect(jsonData[0].id).to.eql(assignID);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{studentToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/my-assignments",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"my-assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[S] Submit assignment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"// Verify date and time formation",
+							"pm.test(\"Check date format\", function () {",
+							"    pm.expect(jsonData[0].createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/);",
+							"    pm.expect(jsonData[0].submittedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/);",
+							"});",
+							"",
+							"pm.test(\"Verify that assigment is SUBMITTED\", function () {",
+							"    pm.expect(jsonData[0].status).to.eql(\"SUBMITTED\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{studentToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"assignmentId\": {{assignID}},\n  \"answers\": [\n    {\n      \"textAnswer\": \"API Tester\"\n    },\n    {\n      \"answer\": [3]\n    },\n    {\n      \"answer\": [0, 1]\n    }\n  ]\n}\n\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/submit-assignment",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"submit-assignment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[S] all submitted assignments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Verify that result is pending\", function () {",
+							"    pm.expect(jsonData[0].result).to.eql(\"PENDING\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{studentToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/my-grades",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"my-grades"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T] grade assignment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 1500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+							"});",
+							"",
+							"pm.test(\"Verify that we graded correct Assignment \", function () {",
+							"    var assignID = pm.environment.get(\"assignID\");",
+							"    var found = false;",
+							"    for (var i = 0; i < jsonData.length; i++) {",
+							"        if (jsonData[i].id === parseInt(assignID)) {",
+							"            found = true;",
+							"            break;",
+							"        }",
+							"    }",
+							"    pm.expect(found).to.eql(true); ",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"summary\": \"GOOD JOB\",\n  \"result\": \"PASSED\",\n  \"grades\": [\n    {\n      \"comment\": \"BEAUTIFUL\",\n      \"additionalScore\": 11\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/assignment/{{assignID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"assignment",
+						"{{assignID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T] delete quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Verify all fieal are present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"status\");",
+							"    pm.expect(jsonData).to.have.property(\"message\");",
+							"});",
+							"",
+							"pm.test(\"Verify successful quiz deletion\", function () {",
+							"    pm.expect(jsonData.status).to.eql(\"success\");",
+							"    pm.expect(jsonData.message).to.eql(\"Quiz was deleted\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/quiz/{{quizID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"quiz",
+						"{{quizID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[T] delete assignment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"// Parsing JSON response ",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verify that Response time is less than 500ms",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Verify all fieal are present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"status\");",
+							"    pm.expect(jsonData).to.have.property(\"message\");",
+							"});",
+							"",
+							"pm.test(\"Verify successful Assignment deletion\", function () {",
+							"    pm.expect(jsonData.status).to.eql(\"success\");",
+							"    pm.expect(jsonData.message).to.eql(\"Assignment was deleted\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/assignment/{{AssignIDEL}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"assignment",
+						"{{AssignIDEL}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
